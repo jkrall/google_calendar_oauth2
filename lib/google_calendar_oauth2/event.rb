@@ -44,8 +44,10 @@ module GoogleCalendar
       }
     end
 
-    def self.list(calendar_id)
-      list = connection.execute(api_method: client.events.list, parameters: { 'calendarId' => calendar_id })
+    def self.list(calendar_id, query = nil)
+      params = { 'calendarId' => calendar_id }
+      params['q'] = query if query
+      list = connection.execute(api_method: client.events.list, parameters: params)
       events = []
       list.data.items.each do |event|
         events << new(event)
@@ -54,9 +56,9 @@ module GoogleCalendar
     end
 
     def self.find_by_name(calendar_id, query)
-      list(calendar_id).each do |event|
+      list(calendar_id, query).each do |event|
         if event.summary == query
-          return @event = new(event.merge({ 'calendar_id' => calendar_id }))
+          return @event = new(event.attributes.merge({ 'calendar_id' => calendar_id }))
         end
       end
       @event
@@ -75,13 +77,13 @@ module GoogleCalendar
 
     def self.insert(calendar_id, attrs)
       new connection.execute(
-        api_method: client.events.insert,
+        api_method: Event.client.events.insert,
         parameters: { 'calendarId' => calendar_id },
         body: JSON.dump(attrs),
         headers: {'Content-Type' => 'application/json'}
       ).data.to_hash.merge 'calendar_id' => calendar_id
     end
-    alias :create :insert
+    def self.create(calendar_id, attrs); insert(calendar_id, attrs) end
 
     def update(attrs = {})
       self.sequence = self.sequence.nil? ? 1 : self.sequence + 1
