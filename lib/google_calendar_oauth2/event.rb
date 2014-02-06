@@ -77,7 +77,7 @@ module GoogleCalendar
       new connection.execute(
         api_method: client.events.insert,
         parameters: { 'calendarId' => calendar_id },
-        body: [JSON.dump(attrs)],
+        body: JSON.dump(attrs),
         headers: {'Content-Type' => 'application/json'}
       ).data.to_hash.merge 'calendar_id' => calendar_id
     end
@@ -92,7 +92,7 @@ module GoogleCalendar
           'calendarId' => self.calendar_id,
           'eventId' => self.id
         },
-        body: [JSON.dump(attrs)],
+        body: JSON.dump(attrs),
         headers: {'Content-Type' => 'application/json'}
       ).data.to_hash.merge('calendar_id' => self.calendar_id)
       self.attributes = result

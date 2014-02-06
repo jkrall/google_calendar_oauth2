@@ -19,7 +19,7 @@ module GoogleCalendar
     def self.create(attrs)
       connection.execute(
         api_method: client.calendars.insert,
-        body: [JSON.dump(attrs)],
+        body: JSON.dump(attrs),
         headers: { "Content-Type" => "application/json" }
       )
     end
@@ -29,7 +29,7 @@ module GoogleCalendar
       connection.execute(
         :api_method => client.calendars.update,
         :parameters => { "calendarId" => calendar_id },
-        :body_object => [JSON.dump(attrs)],
+        :body_object => JSON.dump(attrs),
         :headers => { "Content-Type" => "application/json" }
       )
     end
