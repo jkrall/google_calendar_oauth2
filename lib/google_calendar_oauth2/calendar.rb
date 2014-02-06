@@ -23,7 +23,7 @@ module GoogleCalendar
         headers: { "Content-Type" => "application/json" }
       )
     end
-    alias :insert :create
+    def self.insert(attrs); create(attrs) end
 
     def self.update(calendar_id, attrs)
       connection.execute(

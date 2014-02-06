@@ -1,6 +1,6 @@
 module GoogleCalendar
   class Event
-    attr_accessor :id, :summary, :calendar_id, :start_time, :end_time, :sequence, :etag, :status, :html_link, :created_at, :updated_at
+    attr_accessor :id, :summary, :description, :calendar_id, :start_time, :end_time, :sequence, :etag, :status, :html_link, :created_at, :updated_at
 
     extend Connection
 
@@ -8,6 +8,7 @@ module GoogleCalendar
       @id = attrs['id']
       @etag = attrs['etag']
       @summary = attrs['summary']
+      @description = attrs['description']
       @status = attrs['status']
       @html_link = attrs['htmlLink']
       @created_at = attrs['created']
@@ -21,7 +22,7 @@ module GoogleCalendar
     alias attributes= initialize
 
     def to_s
-    "#&lt;Event id: #{self.id}, summary: #{self.summary}, start_time: #{self.start_time}, end_time: #{self.end_time}, calendar_id: #{self.calendar_id}, sequence: #{self.sequence}, etag: #{self.etag}, status: #{self.status}, html_link: #{self.html_link}, created_at: #{self.created_at}, updated_at: #{self.updated_at}&gt;"
+      "#<GoogleCalendar::Event #{attributes.inspect}>"
     end
 
     def attributes
@@ -29,6 +30,7 @@ module GoogleCalendar
         id: id,
         etag: etag,
         summary: summary,
+        description: description,
         status: status,
         html_link: html_link,
         created_at: created_at,
@@ -50,7 +52,7 @@ module GoogleCalendar
       list = connection.execute(api_method: client.events.list, parameters: params)
       events = []
       list.data.items.each do |event|
-        events << new(event)
+        events << new(event.to_hash.merge({ 'calendar_id' => calendar_id }))
       end
       events
     end
@@ -87,7 +89,7 @@ module GoogleCalendar
 
     def update(attrs = {})
       self.sequence = self.sequence.nil? ? 1 : self.sequence + 1
-      attrs = self.attributes.merge(attrs)
+      attrs = self.attributes.stringify_keys.merge(attrs.stringify_keys)
       result = Event.connection.execute(
         api_method: Event.client.events.update,
         parameters: {
